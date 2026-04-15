@@ -202,3 +202,54 @@ html.lenis, html.lenis body {
     scroll-behavior: smooth;
   }
 }
+
+/* Menu Narrative Section - Smooth Transitions */
+@media (max-width: 768px) {
+  /* Mobile optimization for narrative section */
+  .menu-narrative-container {
+    overflow-x: hidden;
+  }
+
+  /* GPU acceleration for animated elements */
+  .narrative-text,
+  .narrative-image,
+  .narrative-container {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Optimize text containers */
+  .narrative-text {
+    will-change: transform, opacity;
+  }
+
+  /* Images with blur and scale animations */
+  .narrative-image {
+    will-change: transform, opacity, filter;
+    image-rendering: -webkit-optimize-contrast;
+  }
+
+  /* Container transitions */
+  .narrative-container {
+    will-change: opacity, background-color;
+  }
+}
+
+/* Desktop: Enhanced narrative section */
+@media (min-width: 769px) {
+  /* Narrative containers */
+  .narrative-container {
+    will-change: opacity, background-color;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Images for parallax */
+  .narrative-image {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}

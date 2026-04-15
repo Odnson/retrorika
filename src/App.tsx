@@ -10,6 +10,7 @@ const LogoRetorikaSectionV2 = lazy(() => import("@/components/LogoRetorikaSectio
 const GlobeMapSection = lazy(() => import("@/components/GlobeMapSection"));
 const DatangPergiSection = lazy(() => import("@/components/DatangPergiSection"));
 const GallerySection = lazy(() => import("@/components/GallerySection"));
+const MenuNarrativeSection = lazy(() => import("@/components/MenuNarrativeSection"));
 
 // Minimal loading fallback
 const SectionFallback = () => (
@@ -121,6 +122,9 @@ export default function App() {
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <GallerySection />
+        </Suspense>
+        <Suspense fallback={<SectionFallback />}>
+          <MenuNarrativeSection />
         </Suspense>
       </div>
     </>
