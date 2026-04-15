@@ -1,0 +1,130 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Lenis smooth scroll */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Mobile-specific Lenis optimizations */
+@media (max-width: 1023px) {
+  html.lenis {
+    /* Enable native momentum scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  html.lenis body {
+    /* Prevent scroll chaining issues */
+    overscroll-behavior: none;
+  }
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+}
+
+:root {
+  --background: 0 0% 98%;
+  --foreground: 0 0% 10%;
+  --app-font-sans: 'Inter', sans-serif;
+  --app-font-serif: Georgia, serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: auto;
+    /* Smooth touch scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
+  }
+
+  body {
+    font-family: var(--app-font-sans);
+    background: #ffffff;
+    color: #fff;
+    overflow-x: hidden;
+    /* Better text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent pull-to-refresh on mobile */
+    overscroll-behavior-y: none;
+    /* Prevent horizontal scroll bounce */
+    overscroll-behavior-x: none;
+  }
+
+  /* Remove any borders/outlines that cause section lines */
+  *, *::before, *::after {
+    border: none;
+    outline: none;
+  }
+  
+  /* Mobile performance: force GPU layers for animated elements */
+  @media (max-width: 768px) {
+    .sticky {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    
+    /* Optimize images for mobile */
+    img {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
+    /* Smooth canvas rendering */
+    canvas {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+  }
+  
+  /* Desktop: allow will-change for better performance */
+  @media (min-width: 769px) {
+    .sticky {
+      will-change: transform;
+    }
+  }
+}
+
+.retrorika-font {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.15em;
+}
+
+.hero-font {
+  font-family: 'Playfair Display', serif;
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

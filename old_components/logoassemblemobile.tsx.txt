@@ -1,0 +1,264 @@
+import { useRef, useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import logo1 from "@assets/logo-1_1775879051513.png";
+import logo2 from "@assets/logo-2_1775879051513.png";
+import logo3 from "@assets/logo-3_1775879051514.png";
+import logo4 from "@assets/logo-4_1775879051514.png";
+import logo5 from "@assets/logo-5_1775879051514.png";
+import logo6 from "@assets/logo-6_1775879051515.png";
+import logo7 from "@assets/logo-7_1775879051515.png";
+
+gsap.registerPlugin(ScrollTrigger);
+
+// ── Scattered positions for PHASE 1 — normalised to 480px canvas ──
+// Multiplied by `f` (actual canvas size / 480) inside useEffect for responsiveness.
+// x values kept modest so on mobile (f≈0.64) pieces stay mostly on-screen.
+const SCATTER_BASE = {
+  r1: { x: -175, y: -150, scale: 0.60, rotate:  4 }, // mountains → top-left
+  r2: { x: -170, y:  110, scale: 0.60, rotate: -3 }, // forest    → left
+  r3: { x:  180, y: -130, scale: 0.60, rotate: -6 }, // bird      → top-right
+  r4: { x:  165, y:  120, scale: 0.60, rotate:  5 }, // coffee    → right
+  r5: { x:    0, y:  220, scale: 0.60, rotate:  0 }, // wordmark  → bottom-center
+};
+
+export default function LogoAssembleSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  const r1 = useRef<HTMLDivElement>(null); // mountains
+  const r2 = useRef<HTMLDivElement>(null); // forest
+  const r3 = useRef<HTMLDivElement>(null); // bird
+  const r4 = useRef<HTMLDivElement>(null); // coffee tree
+  const r5 = useRef<HTMLDivElement>(null); // wordmark
+  const r6 = useRef<HTMLDivElement>(null); // frame/sun (lowest z, only phase 2)
+  const r7 = useRef<HTMLDivElement>(null); // tagline wrap (phase 2 finale)
+
+  useEffect(() => {
+    const all = [r1, r2, r3, r4, r5, r6, r7];
+    if (!sectionRef.current || all.some((r) => !r.current)) return;
+
+    let gsapCtx: ReturnType<typeof gsap.context> | null = null;
+
+    function buildTimeline() {
+      gsapCtx?.revert();
+
+      // ── Responsive scatter: scale positions to actual canvas size ──
+      // SCATTER_BASE is tuned for 480px canvas; on mobile it's ~307px (82vw on 375px screen)
+      const canvasEl = r1.current!.parentElement!;
+      const canvasSize = canvasEl.getBoundingClientRect().width || 480;
+      const f = Math.min(canvasSize / 480, 1); // clamp: no upscaling on large screens
+
+      const S = {
+        r1: { ...SCATTER_BASE.r1, x: SCATTER_BASE.r1.x * f, y: SCATTER_BASE.r1.y * f },
+        r2: { ...SCATTER_BASE.r2, x: SCATTER_BASE.r2.x * f, y: SCATTER_BASE.r2.y * f },
+        r3: { ...SCATTER_BASE.r3, x: SCATTER_BASE.r3.x * f, y: SCATTER_BASE.r3.y * f },
+        r4: { ...SCATTER_BASE.r4, x: SCATTER_BASE.r4.x * f, y: SCATTER_BASE.r4.y * f },
+        r5: { ...SCATTER_BASE.r5, x: SCATTER_BASE.r5.x * f, y: SCATTER_BASE.r5.y * f },
+      };
+
+      gsapCtx = gsap.context(() => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.4,
+          },
+        });
+
+        // ══════════════════════════════════════════════
+        //  PHASE 1 — INTRO: pieces appear one by one
+        //  scattered around the canvas (0 → 5.1 units)
+        // ══════════════════════════════════════════════
+
+        // logo-1: mountains — enters from top-left corner
+        tl.fromTo(r1.current,
+          { x: S.r1.x - 80 * f, y: S.r1.y - 70 * f, scale: 0.38, opacity: 0, rotate: S.r1.rotate + 6 },
+          { x: S.r1.x, y: S.r1.y, scale: S.r1.scale, opacity: 1, rotate: S.r1.rotate, duration: 1.1, ease: "power3.out" },
+          0
+        );
+
+        // logo-2: forest — rises from bottom-left
+        tl.fromTo(r2.current,
+          { x: S.r2.x - 70 * f, y: S.r2.y + 85 * f, scale: 0.38, opacity: 0, rotate: S.r2.rotate - 5 },
+          { x: S.r2.x, y: S.r2.y, scale: S.r2.scale, opacity: 1, rotate: S.r2.rotate, duration: 1.1, ease: "power3.out" },
+          0.80
+        );
+
+        // logo-3: bird — flies in from right
+        tl.fromTo(r3.current,
+          { x: S.r3.x + 140 * f, y: S.r3.y - 60 * f, scale: 0.35, opacity: 0, rotate: S.r3.rotate - 10 },
+          { x: S.r3.x, y: S.r3.y, scale: S.r3.scale, opacity: 1, rotate: S.r3.rotate, duration: 1.1, ease: "power3.out" },
+          1.60
+        );
+
+        // logo-4: coffee tree — comes from bottom-right
+        tl.fromTo(r4.current,
+          { x: S.r4.x + 85 * f, y: S.r4.y + 85 * f, scale: 0.38, opacity: 0, rotate: S.r4.rotate + 8 },
+          { x: S.r4.x, y: S.r4.y, scale: S.r4.scale, opacity: 1, rotate: S.r4.rotate, duration: 1.1, ease: "power3.out" },
+          2.40
+        );
+
+        // logo-5: wordmark — rises from bottom
+        tl.fromTo(r5.current,
+          { x: S.r5.x, y: S.r5.y + 75 * f, scale: 0.38, opacity: 0, rotate: 0 },
+          { x: S.r5.x, y: S.r5.y, scale: S.r5.scale, opacity: 1, rotate: 0, duration: 1.1, ease: "power3.out" },
+          3.20
+        );
+
+        // — hold all pieces scattered (brief pause) —
+        tl.to({}, { duration: 0.8 }, 4.30);
+
+        // ══════════════════════════════════════════════
+        //  PHASE 2 — ASSEMBLE: pieces fly to center
+        //  each one "connecting" to form the full logo
+        //  (5.10 → 13.2 units)
+        // ══════════════════════════════════════════════
+
+        const ASSEMBLED = { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 };
+
+        // ① Bird — first to arrive, with natural bounce
+        tl.to(r3.current, { ...ASSEMBLED, duration: 1.5, ease: "back.out(1.6)" }, 5.10);
+
+        // ② Coffee tree — sweeps up to meet the bird
+        tl.to(r4.current, { ...ASSEMBLED, duration: 1.4, ease: "power3.out" }, 5.80);
+
+        // ③ Forest — rises from below, locks in
+        tl.to(r2.current, { ...ASSEMBLED, duration: 1.35, ease: "power2.out" }, 6.55);
+
+        // ④ Mountains — sweeps up
+        tl.to(r1.current, { ...ASSEMBLED, duration: 1.4, ease: "power3.out" }, 7.30);
+
+        // ④ Logo-7 (tagline) — arrives simultaneously with mountains, ghost→fill
+        tl.fromTo(r7.current,
+          { x: 0, y: 60, scale: 0.88, opacity: 0, filter: "contrast(0.08) brightness(3.5)" },
+          { x: 0, y: 0, scale: 1, opacity: 1, filter: "contrast(1) brightness(1)", duration: 1.5, ease: "power2.out" },
+          7.30
+        );
+
+        // ⑤ Wordmark — snaps in with bounce
+        tl.to(r5.current, { ...ASSEMBLED, duration: 1.2, ease: "back.out(2.0)" }, 8.70);
+
+        // ⑥ Logo-6 (hexagon frame) — LAST, wraps from oversized → exact fit
+        //    the frame "closes" around all assembled elements inside
+        tl.fromTo(r6.current,
+          { scale: 1.85, opacity: 0, filter: "contrast(0.05) brightness(5)" },
+          { scale: 1, opacity: 1, filter: "contrast(1) brightness(1)", duration: 2.2, ease: "expo.out" },
+          9.60
+        );
+
+        // — hold assembled logo —
+        tl.to({}, { duration: 0.8 }, 11.80);
+
+      }, sectionRef);
+    }
+
+    // rAF ensures DOM is fully laid out before measuring canvas size
+    const rafId = requestAnimationFrame(buildTimeline);
+
+    // Rebuild on resize so mobile/desktop switch recalculates scatter positions
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(buildTimeline, 120);
+    };
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", onResize);
+      gsapCtx?.revert();
+    };
+  }, []);
+
+  // Base layer — original colors, NO filter/blend manipulation
+  const base: React.CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    willChange: "transform, opacity, filter",
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative light-section"
+      style={{ height: "540vh", background: "#f4f1ed" }}
+    >
+      {/* ── Sticky viewport ── */}
+      <div
+        className="sticky top-0 flex items-center justify-center overflow-hidden"
+        style={{ height: "100dvh", background: "#f4f1ed" }}
+      >
+        {/* Warm center glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 52%, rgba(255,246,228,0.55) 0%, transparent 72%)",
+          }}
+        />
+
+        {/* ── Logo canvas ──
+          Z-index (DOM order = lowest → highest):
+          r6 (frame) → r1 (mountains) → r2 (forest) → r7 (tagline) → r5 (wordmark) → r4 (coffee tree) → r3 (bird)
+        */}
+        <div
+          className="relative select-none"
+          style={{ width: "min(82vw, 480px)", aspectRatio: "1 / 1" }}
+        >
+          {/* z:1 — logo-6: outer hexagon frame (LOWEST z-index, appears LAST) */}
+          <div ref={r6} style={{ ...base, opacity: 0, zIndex: 1,
+            filter: "contrast(0.05) brightness(5)" }}>
+            <img src={logo6} alt="Hexagon frame" className="w-full h-full object-contain" draggable={false} />
+          </div>
+
+          {/* z:2 — logo-7: tagline (below forest so forest is not covered) */}
+          <div ref={r7} style={{ ...base, opacity: 0, zIndex: 2,
+            filter: "contrast(0.08) brightness(3.5)" }}>
+            <img src={logo7} alt="Tagline" className="w-full h-full object-contain" draggable={false} />
+          </div>
+
+          {/* z:3 — logo-1: mountains */}
+          <div ref={r1} style={{ ...base, opacity: 0, zIndex: 3 }}>
+            <img src={logo1} alt="Mountains" className="w-full h-full object-contain" draggable={false} />
+          </div>
+
+          {/* z:4 — logo-2: forest landscape (above tagline) */}
+          <div ref={r2} style={{ ...base, opacity: 0, zIndex: 4 }}>
+            <img src={logo2} alt="Forest" className="w-full h-full object-contain" draggable={false} />
+          </div>
+
+          {/* z:5 — logo-5: RetrorikA wordmark */}
+          <div ref={r5} style={{ ...base, opacity: 0, zIndex: 5 }}>
+            <img src={logo5} alt="RetrorikA" className="w-full h-full object-contain" draggable={false} />
+          </div>
+
+          {/* z:6 — logo-4: coffee tree branches */}
+          <div ref={r4} style={{ ...base, opacity: 0, zIndex: 6 }}>
+            <img src={logo4} alt="Coffee tree" className="w-full h-full object-contain" draggable={false} />
+          </div>
+
+          {/* z:7 — logo-3: bird (highest layer) */}
+          <div ref={r3} style={{ ...base, opacity: 0, zIndex: 7 }}>
+            <img src={logo3} alt="Bird" className="w-full h-full object-contain" draggable={false} />
+          </div>
+        </div>
+
+        {/* Scroll hint */}
+        <div
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+          style={{ opacity: 0.35 }}
+        >
+          <span
+            className="text-stone-500 text-[9px] tracking-[0.28em] uppercase"
+            style={{ fontFamily: "'Cinzel', serif" }}
+          >
+            scroll
+          </span>
+          <div className="w-px h-5 bg-stone-400 animate-pulse" />
+        </div>
+      </div>
+    </section>
+  );
+}

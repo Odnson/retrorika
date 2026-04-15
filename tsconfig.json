@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*", "old_components/CommitmentSection.tsx", "old_components/CounterCommitmentSection.tsx", "old_components/CounterSection.tsx", "old_components/DissolveHeroSection.tsx", "old_components/IndonesiaMapSection.tsx", "old_components/GlobeSection.tsx", "old_components/LogoRetrorikaSection.tsx"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler",
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "references": [
+    {
+      "path": "../../lib/api-client-react"
+    }
+  ]
+}
