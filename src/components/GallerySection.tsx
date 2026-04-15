@@ -456,11 +456,13 @@ export default function GallerySection() {
       });
 
       // PHASE 1 → PHASE 2 Transition (30-42%)
+      const isMobileView = window.innerWidth < 768;
+      
       const tl1 = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "30% top",
-          end: "42% top",
+          end: isMobileView ? "50% top" : "42% top",
           scrub: 0.5,
           onLeaveBack: () => {
             // Reset text when scrolling back
@@ -481,23 +483,37 @@ export default function GallerySection() {
         },
       });
 
-      // Cards slide right and fade out (simultaneously with text)
-      [cardsContainerRef.current, cardsContainerMobileRef.current].forEach(el => {
+      // Cards animation - mobile: fade and scale, desktop: slide
+      [cardsContainerRef.current, cardsContainerMobileRef.current].forEach((el, idx) => {
         if (el) {
-          tl1.to(el, {
-            x: 400,
-            opacity: 0,
-            ease: "power2.inOut",
-          }, 0);
+          const isMobileEl = idx === 1; // Second one is mobile
+          if (isMobileEl) {
+            // Mobile: scale down and fade
+            tl1.to(el, {
+              scale: 0.85,
+              opacity: 0,
+              y: 30,
+              ease: "power3.in",
+              duration: 0.8,
+            }, 0);
+          } else {
+            // Desktop: slide right and fade
+            tl1.to(el, {
+              x: 400,
+              opacity: 0,
+              ease: "power2.inOut",
+            }, 0);
+          }
         }
       });
 
       // Text moves to center (simultaneously with cards)
-      [textRef.current, textMobileRef.current].forEach(el => {
+      [textRef.current, textMobileRef.current].forEach((el, idx) => {
         if (el) {
           const heading = el.querySelector('h2');
           const divider = el.querySelector('.divider');
           const indicators = el.querySelector('.indicators');
+          const isMobileEl = idx === 1;
           
           tl1.to(el, {
             left: "50%",
@@ -505,28 +521,38 @@ export default function GallerySection() {
             x: "-50%",
             y: "-50%",
             ease: "power2.inOut",
+            duration: 0.8,
           }, 0);
           
-          // Change text properties
+          // Change text properties with stagger
           if (heading) {
             tl1.to(heading, {
               color: DARK_GRAY,
               textAlign: "center",
               ease: "power2.inOut",
-            }, 0);
+              duration: 0.6,
+            }, 0.1);
           }
           
-          // Hide divider and indicators
+          // Hide divider and indicators with stagger
           if (divider) {
-            tl1.to(divider, { opacity: 0, ease: "power2.out" }, 0);
+            tl1.to(divider, { 
+              opacity: 0, 
+              scale: 0.8,
+              ease: "back.in" 
+            }, 0.2);
           }
           if (indicators) {
-            tl1.to(indicators, { opacity: 0, ease: "power2.out" }, 0);
+            tl1.to(indicators, { 
+              opacity: 0,
+              y: -10,
+              ease: "power2.out" 
+            }, 0.15);
           }
         }
       });
 
-      // Trigger scramble when text reaches center
+      // Trigger scramble when text reaches center with smooth timing
       tl1.call(() => {
         if (!hasScrambled) {
           setHasScrambled(true);
@@ -545,74 +571,129 @@ export default function GallerySection() {
               const originalText = textElement.textContent || "";
               const cleanText = originalText.replace(/\s+/g, ' ').trim();
               textElement.innerHTML = cleanText;
-              scrambleText(textElement, "When<br />passion<br />meets<br />art", 600);
+              scrambleText(textElement, "When passion meets art", isMobileView ? 400 : 600);
             }
           }
         }
-      }, [], 0.5);
+      }, [], isMobileView ? 0.3 : 0.5);
 
-      // Phase 2 background fades in
+      // Phase 2 background fades in smoothly
       tl1.to(phase2ContainerRef.current, {
         opacity: 1,
-        ease: "power2.in",
-      }, 0.2);
+        ease: "power2.inOut",
+        duration: 0.5,
+      }, isMobileView ? 0.2 : 0.2);
 
-      // Left image - falls from top (with delay)
-      tl1.fromTo(leftImageRef.current,
-        { opacity: 0, y: -200, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, ease: "power3.out", duration: 0.6 },
-        0.8
-      );
+      // Image animations - optimized for desktop, simpler for mobile
+      if (!isMobileView) {
+        // Left image - falls from top (with delay)
+        tl1.fromTo(leftImageRef.current,
+          { opacity: 0, y: -200, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, ease: "power3.out", duration: 0.6 },
+          0.8
+        );
 
-      // Right image - falls from bottom (with delay, slightly after left)
-      tl1.fromTo(rightImageRef.current,
-        { opacity: 0, y: 200, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, ease: "power3.out", duration: 0.6 },
-        0.95
-      );
+        // Right image - falls from bottom (with delay, slightly after left)
+        tl1.fromTo(rightImageRef.current,
+          { opacity: 0, y: 200, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, ease: "power3.out", duration: 0.6 },
+          0.95
+        );
+      }
 
       // PHASE 2 → PHASE 3 Transition (65-80%)
       const tl2 = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "65% top",
-          end: "80% top",
+          end: isMobileView ? "90% top" : "80% top",
           scrub: 1,
         },
       });
 
-      // Everything from Phase 2 fades out
-      tl2.to([textRef.current, textMobileRef.current, leftImageRef.current, rightImageRef.current, phase2ContainerRef.current], {
-        opacity: 0,
-        ease: "power2.out",
-      }, 0);
+      // Everything from Phase 2 fades out with stagger on mobile
+      if (isMobileView) {
+        tl2.to(textRef.current, {
+          opacity: 0,
+          y: -20,
+          ease: "power2.out",
+          duration: 0.4,
+        }, 0);
+        
+        tl2.to(textMobileRef.current, {
+          opacity: 0,
+          y: -20,
+          ease: "power2.out",
+          duration: 0.4,
+        }, 0);
+        
+        tl2.to([leftImageRef.current, rightImageRef.current], {
+          opacity: 0,
+          ease: "power2.out",
+          duration: 0.4,
+        }, 0);
+        
+        tl2.to(phase2ContainerRef.current, {
+          opacity: 0,
+          ease: "power2.out",
+          duration: 0.5,
+        }, 0);
+      } else {
+        tl2.to([textRef.current, textMobileRef.current, leftImageRef.current, rightImageRef.current, phase2ContainerRef.current], {
+          opacity: 0,
+          ease: "power2.out",
+        }, 0);
+      }
 
-      // Phase 3 fades in
+      // Phase 3 background fades in
       tl2.fromTo(phase3ContainerRef.current,
         { opacity: 0 },
-        { opacity: 1, ease: "power2.in" },
-        0.3
+        { opacity: 1, ease: "power2.inOut", duration: 0.6 },
+        isMobileView ? 0.15 : 0.3
       );
 
-      // Phase 3 content appears
-      tl2.fromTo(phase3ImageRef.current,
-        { opacity: 0, x: -50 },
-        { opacity: 1, x: 0, ease: "power2.out" },
-        0.4
-      );
+      // Phase 3 content appears with smooth sequence
+      if (isMobileView) {
+        // Mobile: stacked vertical layout with smooth reveal
+        tl2.fromTo(phase3ImageRef.current,
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, ease: "power3.out", duration: 0.6 },
+          0.3
+        );
 
-      tl2.fromTo(phase3LabelRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, ease: "power2.out" },
-        0.5
-      );
+        tl2.fromTo(phase3LabelRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, ease: "power3.out", duration: 0.5 },
+          0.45
+        );
+      } else {
+        // Desktop: side-by-side with different timing
+        tl2.fromTo(phase3ImageRef.current,
+          { opacity: 0, x: -50 },
+          { opacity: 1, x: 0, ease: "power2.out", duration: 0.5 },
+          0.4
+        );
 
+        tl2.fromTo(phase3LabelRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, ease: "power2.out", duration: 0.4 },
+          0.5
+        );
+      }
+
+      // Text lines appear with stagger
       const textLines = phase3TextRef.current?.querySelectorAll(".text-line");
       if (textLines) {
         tl2.fromTo(textLines,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, stagger: 0.05, ease: "power2.out" },
-          0.6
+          { opacity: 0, y: 15 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            stagger: isMobileView ? 0.08 : 0.05, 
+            ease: "power3.out",
+            duration: 0.4,
+          },
+          isMobileView ? 0.55 : 0.6
         );
       }
 
@@ -630,26 +711,50 @@ export default function GallerySection() {
         }
       );
 
-      // Subtle parallax (simplified)
-      gsap.to([leftImageRef.current, rightImageRef.current], {
-        y: -30,
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "30% top",
-          end: "65% top",
-          scrub: 1.5,
-        },
-      });
+      // Subtle parallax (simplified) - optimized for mobile
+      if (!isMobileView) {
+        // Desktop parallax effect
+        gsap.to([leftImageRef.current, rightImageRef.current], {
+          y: -30,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "30% top",
+            end: "65% top",
+            scrub: 1.5,
+          },
+        });
 
-      gsap.to(phase3ImageRef.current, {
-        y: -30,
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "65% top",
-          end: "bottom top",
-          scrub: 1.5,
-        },
-      });
+        gsap.to(phase3ImageRef.current, {
+          y: -30,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "65% top",
+            end: "bottom top",
+            scrub: 1.5,
+          },
+        });
+      } else {
+        // Mobile: subtle parallax for performance
+        gsap.to([leftImageRef.current, rightImageRef.current], {
+          y: -15,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "30% top",
+            end: "65% top",
+            scrub: 2,
+          },
+        });
+
+        gsap.to(phase3ImageRef.current, {
+          y: -15,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "65% top",
+            end: "bottom top",
+            scrub: 2,
+          },
+        });
+      }
 
       ScrollTrigger.create({
         trigger: containerRef.current,
