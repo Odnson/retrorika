@@ -129,68 +129,76 @@ html.lenis, html.lenis body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Gallery Section - Smooth Mobile Transitions */
+/* Gallery Section - Mobile-First Smooth Transitions */
 @media (max-width: 768px) {
-  /* Optimize gallery containers for mobile animations */
-  [ref="cardsContainerMobileRef"],
-  [ref="textMobileRef"],
-  [ref="phase2ContainerRef"],
-  [ref="phase3ContainerRef"] {
-    /* Enable GPU acceleration */
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    /* Smooth transitions */
-    will-change: transform, opacity;
-    transition: none; /* Let GSAP handle transitions */
-  }
-
-  /* Gallery cards - smooth stacking animations */
-  .gallery-card {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    will-change: transform, opacity;
-  }
-
-  /* Phase transition containers */
+  /* GPU acceleration for all animated gallery elements */
+  .gallery-card,
+  .gallery-text,
+  .gallery-image,
   .phase-container {
     transform: translateZ(0);
-    -webkit-transform: translate3d(0, 0, 0);
-    -webkit-perspective: 1000;
-    perspective: 1000;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
   }
 
-  /* Smooth fade transitions */
-  @supports (animation-timeline: scroll()) {
-    /* Enhanced smoothing for scroll-driven animations */
-    * {
-      animation-timing-function: linear !important;
-    }
+  /* Optimize cards for scale animations */
+  .gallery-card {
+    will-change: transform, opacity;
+    transform-origin: center;
+  }
+
+  /* Text containers for smooth positioning */
+  .gallery-text {
+    will-change: transform, opacity;
+  }
+
+  /* Images for smooth reveal animations */
+  .gallery-image,
+  .phase-image {
+    will-change: transform, opacity, filter;
+    image-rendering: -webkit-optimize-contrast;
+  }
+
+  /* Phase containers for background transitions */
+  .phase-container {
+    will-change: opacity;
   }
 }
 
-/* Reduce motion for users who prefer it */
+/* Accessibility: Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* Desktop: Enhanced parallax and smooth animations */
+/* Desktop: Optimized parallax and enhanced animations */
 @media (min-width: 769px) {
-  /* Gallery containers with GPU acceleration */
-  [ref="phase2ContainerRef"],
-  [ref="phase3ContainerRef"] {
+  /* Phase containers with GPU acceleration */
+  .phase-container {
     will-change: opacity, transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
-  /* Smooth image transitions */
-  [ref="leftImageRef"],
-  [ref="rightImageRef"],
-  [ref="phase3ImageRef"] {
+  /* Images for parallax and transitions */
+  .gallery-image,
+  .phase-image {
     will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
   }
 }
